@@ -1,0 +1,30 @@
+site: coingecko
+name: prices
+description: Live cryptocurrency prices
+version: 1
+created_by: manual
+source:
+  type: api
+  base_url: https://api.coingecko.com/api/v3
+  auth: none
+  rate_limit: { requests: 30, per: 60 }
+args:
+  coins: { type: string, default: "bitcoin,ethereum", description: Comma-separated coin IDs }
+  currency: { type: string, default: usd }
+schema:
+  type: price_feed
+  entity: cryptocurrency
+  fields:
+    id: { role: id }
+    price: { role: value, unit: currency }
+    change_24h: { role: delta }
+    market_cap: { role: metric }
+  update_frequency: "~60s"
+pipeline:
+  - fetch: { url: /simple/price, params: { ids: "${{ args.coins }}", vs_currencies: "${{ args.currency }}", include_market_cap: true, include_24hr_change: true, include_last_updated_at: true } }
+  - transform: |
+      Object.entries(data).map(([id, v]) => {
+        var cur = args.currency || 'usd';
+        return { id: id, price: v[cur], change_24h: v[cur + '_24h_change'] ? v[cur + '_24h_change'].toFixed(2) + '%' : 'N/A', market_cap: v[cur + '_market_cap'] };
+      })
+columns: [id, price, change_24h, market_cap]

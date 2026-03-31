@@ -1,0 +1,23 @@
+site: bluesky
+name: profile
+description: Get Bluesky user profile
+version: 1
+created_by: manual
+source:
+  type: api
+  base_url: https://public.api.bsky.app/xrpc
+  auth: none
+args:
+  handle: { type: string, required: true, positional: true, description: "Bluesky handle" }
+schema:
+  type: profile
+  entity: user
+  fields:
+    handle: { role: id }
+    displayName: { role: title }
+    followersCount: { role: score }
+pipeline:
+  - fetch: { url: /app.bsky.actor.getProfile, params: { actor: "${{ args.handle }}" } }
+  - transform: |
+      [{ handle: data.handle, name: data.displayName, followers: data.followersCount, following: data.followsCount, posts: data.postsCount, description: (data.description || '').substring(0, 100) }]
+columns: [handle, name, followers, following, posts]

@@ -1,0 +1,25 @@
+site: bluesky
+name: search
+description: Search Bluesky users
+version: 1
+created_by: manual
+source:
+  type: api
+  base_url: https://public.api.bsky.app/xrpc
+  auth: none
+args:
+  query: { type: string, required: true, positional: true }
+  limit: { type: number, default: 10 }
+schema:
+  type: search_results
+  entity: user
+  fields:
+    handle: { role: id }
+    displayName: { role: title }
+    followersCount: { role: score }
+pipeline:
+  - fetch: { url: /app.bsky.actor.searchActors, params: { q: "${{ args.query }}", limit: "${{ args.limit }}" } }
+  - select: actors
+  - map: { rank: "${{ index + 1 }}", handle: "${{ item.handle }}", name: "${{ item.displayName }}", followers: "${{ item.followersCount }}" }
+  - limit: "${{ args.limit }}"
+columns: [rank, handle, name, followers]

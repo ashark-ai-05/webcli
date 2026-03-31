@@ -1,0 +1,28 @@
+site: hackernews
+name: search
+description: Search Hacker News stories
+version: 1
+created_by: manual
+source:
+  type: api
+  base_url: https://hn.algolia.com/api/v1
+  auth: none
+  rate_limit: { requests: 30, per: 60 }
+args:
+  query: { type: string, required: true, positional: true, description: Search query }
+  limit: { type: number, default: 10 }
+schema:
+  type: feed
+  entity: story
+  fields:
+    title: { role: title }
+    points: { role: score }
+    author: { role: author }
+    url: { role: url }
+  update_frequency: "~5m"
+pipeline:
+  - fetch: { url: /search, params: { query: "${{ args.query }}", tags: story, hitsPerPage: "${{ args.limit }}" } }
+  - select: hits
+  - map: { title: "${{ item.title }}", score: "${{ item.points }}", author: "${{ item.author }}", comments: "${{ item.num_comments }}", url: "${{ item.url }}" }
+  - limit: "${{ args.limit }}"
+columns: [title, score, author, comments, url]

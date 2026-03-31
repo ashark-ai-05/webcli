@@ -1,0 +1,10 @@
+{
+  "coingecko.com": { "name": "coingecko", "api_base": "https://api.coingecko.com/api/v3", "auth": "optional_api_key", "docs": "https://docs.coingecko.com", "endpoints": ["prices", "trending", "search"] },
+  "news.ycombinator.com": { "name": "hackernews", "api_base": "https://hacker-news.firebaseio.com/v0", "auth": "none", "docs": "https://github.com/HackerNews/API", "endpoints": ["top", "new", "best"] },
+  "bsky.app": { "name": "bluesky", "api_base": "https://public.api.bsky.app/xrpc", "auth": "none", "docs": "https://docs.bsky.app", "endpoints": ["feed", "profile", "search"] },
+  "reddit.com": { "name": "reddit", "api_base": "https://www.reddit.com", "auth": "optional_oauth", "docs": "https://www.reddit.com/dev/api/", "endpoints": ["hot", "search", "top"] },
+  "stackoverflow.com": { "name": "stackoverflow", "api_base": "https://api.stackexchange.com/2.3", "auth": "optional_api_key", "docs": "https://api.stackexchange.com/docs", "endpoints": ["search", "questions"] },
+  "github.com": { "name": "github", "api_base": "https://api.github.com", "auth": "optional_api_key", "docs": "https://docs.github.com/en/rest", "endpoints": ["repos", "users", "search"] },
+  "x.com": { "name": "twitter", "api_base": "https://api.x.com/2", "auth": "api_key", "docs": "https://developer.x.com/en/docs", "endpoints": ["tweets", "users", "search"] },
+  "wikipedia.org": { "name": "wikipedia", "api_base": "https://en.wikipedia.org/api/rest_v1", "auth": "none", "docs": "https://en.wikipedia.org/api/rest_v1/", "endpoints": ["page", "search"] }
+}

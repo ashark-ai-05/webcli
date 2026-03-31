@@ -1,0 +1,26 @@
+site: coingecko
+name: trending
+description: Trending cryptocurrencies
+version: 1
+created_by: manual
+source:
+  type: api
+  base_url: https://api.coingecko.com/api/v3
+  auth: none
+  rate_limit: { requests: 30, per: 60 }
+args:
+  limit: { type: number, default: 10 }
+schema:
+  type: feed
+  entity: cryptocurrency
+  fields:
+    name: { role: title }
+    symbol: { role: id }
+    market_cap_rank: { role: score }
+  update_frequency: "~10m"
+pipeline:
+  - fetch: { url: /search/trending }
+  - select: coins
+  - map: { rank: "${{ index + 1 }}", name: "${{ item.item.name }}", symbol: "${{ item.item.symbol }}", market_cap_rank: "${{ item.item.market_cap_rank }}" }
+  - limit: "${{ args.limit }}"
+columns: [rank, name, symbol, market_cap_rank]
