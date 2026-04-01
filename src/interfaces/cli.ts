@@ -42,6 +42,47 @@ export function createCli(registry: AdapterRegistry): Command {
       } catch (err) { console.error(chalk.red(`Failed to load: ${err instanceof Error ? err.message : String(err)}`)); process.exit(1); }
     });
 
+  program.command('crawl <url>')
+    .description('Crawl a website and extract data')
+    .option('-d, --depth <n>', 'Max crawl depth', '2')
+    .option('-p, --max-pages <n>', 'Max pages to crawl', '20')
+    .option('-c, --concurrency <n>', 'Max concurrent requests', '3')
+    .option('--delay <ms>', 'Delay between requests (ms)', '1000')
+    .option('--follow <pattern>', 'URL pattern to follow (glob)')
+    .option('-f, --format <format>', 'Output format: table, json, csv', 'json')
+    .action(async (url: string, options: { depth: string; maxPages: string; concurrency: string; delay: string; follow?: string; format: string }) => {
+      const { executeCrawl } = await import('../crawl/executor.js');
+      try {
+        const result = await executeCrawl({
+          startUrls: [url],
+          maxDepth: parseInt(options.depth),
+          maxPages: parseInt(options.maxPages),
+          concurrency: parseInt(options.concurrency),
+          delayMs: parseInt(options.delay),
+          sameDomainOnly: true,
+          respectRobots: true,
+          followPattern: options.follow,
+          extractFn: async (pageUrl, response) => {
+            const ct = response.headers.get('content-type') || '';
+            if (ct.includes('json')) {
+              const data = await response.json();
+              return Array.isArray(data) ? data : [data];
+            }
+            // For HTML, return page metadata
+            return [{ url: pageUrl, type: 'page' }];
+          },
+          onProgress: (status) => {
+            process.stderr.write(`\r  Crawling... ${status.processed} pages processed, ${status.pending} pending, ${status.results} results`);
+          },
+        });
+        process.stderr.write('\n');
+        console.log(formatOutput(result.data as unknown[], options.format as OutputFormat));
+      } catch (err) {
+        console.error(chalk.red(`Crawl failed: ${err instanceof Error ? err.message : String(err)}`));
+        process.exit(1);
+      }
+    });
+
   return program;
 }
 
